@@ -1,1 +1,1 @@
-# RESTful-API-jwt-Flask-Application
+# Flask_RESTful_API_jwt_app
