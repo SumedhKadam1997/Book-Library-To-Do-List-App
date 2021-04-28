@@ -14,6 +14,8 @@ db = SQLAlchemy(app)
 
 from project.user.views import core
 from project.book.views import book
+from project.todo.views import todo
 
 app.register_blueprint(core)
 app.register_blueprint(book)
+app.register_blueprint(todo)
