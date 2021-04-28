@@ -26,7 +26,7 @@ def token_required(func):
 
         return func(current_user, *args, **kwargs)
     return decorated
-
+# To do routes
 # This is the first route which gets all the todo list of the current logged in user.
 @todo.route('/todo', methods = ['GET', 'POST'])
 @token_required
