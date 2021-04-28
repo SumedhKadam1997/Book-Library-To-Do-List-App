@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 from project.user.views import core
-from project.todo.views import todo
+from project.book.views import book
 
 app.register_blueprint(core)
-app.register_blueprint(todo)
+app.register_blueprint(book)
