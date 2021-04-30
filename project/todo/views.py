@@ -1,33 +1,13 @@
 from flask import Blueprint, jsonify, request
 from project.models import Todo, User
-from project import db, app
-from functools import wraps
-import jwt
+from project import db, token_required
+
 
 todo = Blueprint('todo',__name__)
 
-# This is a decorator which facilitates the login functionality by use of jwt tokens
-def token_required(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        token = None
 
-        if 'login_token' in request.headers:
-            token = request.headers['login_token']
-        
-        if not token:
-            return jsonify({'message' : 'Token is Missing !!'}), 401
-
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-            current_user = User.query.filter_by(id = data['id']).first()
-        except:
-            return jsonify({'message' : 'Token is Invalid !!'}), 401
-
-        return func(current_user, *args, **kwargs)
-    return decorated
 # To do routes
-# This is the first route which gets all the todo list of the current logged in user.
+# This is the first and second route which gets all the todo list of the current logged in user.
 @todo.route('/todo', methods = ['GET', 'POST'])
 @token_required
 def get_or_create_todos(current_user):
@@ -52,7 +32,8 @@ def get_or_create_todos(current_user):
 
         return jsonify({'message' : 'To-do Created !!'})
 
-# This is the second route which gets a single todo of the current logged in user.
+
+# This is the third route which gets a single todo of the current logged in user.
 @todo.route('/todo/<todo_id>', methods = ['GET'])
 @token_required
 def get_one_todo(current_user, todo_id):
@@ -80,6 +61,7 @@ def complete_todo(current_user, todo_id):
     db.session.commit()
 
     return jsonify({'message' : 'To Do Completed !!'})
+
 
 # This is the fifth route which deletes the specified todo of the current logged in user.
 @todo.route('/todo/<todo_id>', methods = ['DELETE'])

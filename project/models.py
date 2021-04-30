@@ -1,7 +1,5 @@
 from project import db
 
-
-
 # These are the db models
 class User(db.Model):
 
@@ -14,7 +12,7 @@ class User(db.Model):
     book = db.relationship('Book',backref='user',uselist=False)
     todo = db.relationship('Todo',backref='user',uselist=False)
 
-
+# Book model to store the books of the user
 class Book(db.Model):
 
     __tablename__ = 'books'
@@ -25,6 +23,7 @@ class Book(db.Model):
     complete = db.Column(db.Boolean)
     user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
 
+# Todo model to store the todos of the user.
 class Todo(db.Model):
 
     __tablename__ = 'todos'

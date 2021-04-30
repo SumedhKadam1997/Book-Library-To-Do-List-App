@@ -1,34 +1,13 @@
 from flask import Blueprint, jsonify, request
 from project.models import Book, User
-from project import db, app
-from functools import wraps
-import jwt
+from project import db, token_required
+
 
 book = Blueprint('book',__name__)
 
-# This is a decorator which facilitates the login functionality by use of jwt tokens
-def token_required(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        token = None
-
-        if 'login_token' in request.headers:
-            token = request.headers['login_token']
-        
-        if not token:
-            return jsonify({'message' : 'Token is Missing !!'}), 401
-
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-            current_user = User.query.filter_by(id = data['id']).first()
-        except:
-            return jsonify({'message' : 'Token is Invalid !!'}), 401
-
-        return func(current_user, *args, **kwargs)
-    return decorated
 
 # Book Routes
-# This is the first route which gets all the book list of the current logged in user.
+# This is the first and second route which gets all the book list of the current logged in user.
 @book.route('/book', methods = ['GET', 'POST'])
 @token_required
 def get_or_create_books(current_user):
@@ -54,7 +33,7 @@ def get_or_create_books(current_user):
 
         return jsonify({'message' : 'Book added to library !!'})
 
-# This is the second route which gets a single book of the current logged in user.
+# This is the third route which gets a single book of the current logged in user.
 @book.route('/book/<book_id>', methods = ['GET'])
 @token_required
 def get_one_book(current_user, book_id):

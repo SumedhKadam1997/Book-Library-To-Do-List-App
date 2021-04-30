@@ -1,50 +1,21 @@
-from flask import Blueprint, jsonify, request, make_response, Response
+from flask import Blueprint, jsonify, request, make_response
 from project.models import User
 from werkzeug.security import check_password_hash, generate_password_hash
-from project import db, app
+from project import db, app, token_required
 from functools import wraps
 import jwt
 import datetime
 
 core = Blueprint('core',__name__)
 
-
-# This is a decorator which facilitates the login functionality by use of jwt tokens
-def token_required(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        token = None
-
-        if 'login_token' in request.headers:
-            token = request.headers['login_token']
-        
-        if not token:
-            return jsonify({'message' : 'Token is Missing !!'})
-
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-            # return jsonify({'data' : data})
-            current_user = User.query.filter_by(id = data['id']).first()
-        except:
-            return jsonify({'message' : 'Token is Invalid !!'})
-
-        return func(current_user, *args, **kwargs)
-    return decorated
-
+# Home route
 @core.route('/', methods = ['GET', 'POST'])
 def hello_world():
-    # if "Authorization" in request.headers:
-    #     auth_header = (request.headers["Authorization"])
-    #     return jsonify({'auth_header' : auth_header})
-    # else:
-    #     return "HELLO"
-    # for i in request.headers:
-        # token = request.headers['login_token']
-        # return jsonify({'headers' : i})
     return "Hello, Welcome to a simple RestFULL app"
 
 
-# Login Function which takes authentication from requests and generate a token for the user valid for specified time
+# Login Function which takes authentication from requests 
+# and generate a token for the user valid for specified time
 @core.route('/login', methods = ['GET', 'POST'])
 def login():
     auth = request.authorization
@@ -58,25 +29,12 @@ def login():
         return make_response('No User Found', 401, {'WWW-Authenticate' : 'Basic realm = "Login Required !!"'})
     
     if check_password_hash(user.password, auth.password):
-        payload = {'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes = 30)}
         token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        # decoded_token = token
-        # url = 'https://127.0.0.1:5000/'
-        # headers = {'login_token': decoded_token}
-        # headers = Headers()
-        # headers.add_header('login_token', decoded_token)
-            # client.post('https://127.0.0.1:5000/login', headers={'login_token' : decoded_token});
-        # with app.test_client() as client:
-        #     client.get('/', headers=dict(Authorization='Bearer ' + decoded_token))
-        # requests.get('https://127.0.0.1:5000/login', headers={'Authorization': token})
-        # HEADERS = {'Authorization': 'token {}'.format(token)}
-        # with requests.Session() as s:
-        #     s.headers.update(HEADERS)
-        #     s.post('http://127.0.0.1:5000/')
         return jsonify({'token' : token.decode('UTF-8')})
 
     return make_response('Could not Verify', 401, {'WWW-Authenticate' : 'Basic realm = "Login Required !!"'})
 
+# Route to get all registered users 
 @core.route('/user', methods = ['GET'])
 @token_required
 def get_all_users(current_user):
@@ -97,6 +55,7 @@ def get_all_users(current_user):
 
     return jsonify({'users' : total_users})
 
+# Route to get single user
 @core.route('/user/<user_id>', methods = ['GET'])
 @token_required
 def get_one_users(current_user, user_id):
@@ -116,6 +75,7 @@ def get_one_users(current_user, user_id):
 
     return jsonify({'user' : user_data})
 
+# Route to create a user
 @core.route('/user', methods = ['POST'])
 @token_required
 def create_user(current_user):
@@ -130,6 +90,7 @@ def create_user(current_user):
 
     return jsonify({'message' : 'New user created'})
 
+# Route to promote a user to ADMIN
 @core.route('/user/<user_id>', methods = ['PUT'])
 @token_required
 def promote_user(current_user, user_id):
@@ -146,6 +107,7 @@ def promote_user(current_user, user_id):
 
     return jsonify({'message' : 'User Promoted !!'})
 
+# Route to delete a user
 @core.route('/user/<user_id>', methods = ['DELETE'])
 @token_required
 def delete_user(current_user, user_id):
