@@ -1,4 +1,20 @@
 # Flask_RESTful_API_jwt_app
+
+## Libraries Used
+
+- click==7.1.2
+- Flask==1.1.2
+- Flask-JWT==0.3.2
+- Flask-SQLAlchemy==2.5.1
+- greenlet==1.0.0
+- itsdangerous==1.1.0
+- Jinja2==2.11.3
+- MarkupSafe==1.1.1
+- PyJWT==1.4.2
+- SQLAlchemy==1.4.11
+- Werkzeug==1.0.1
+
+
 ## Build the Application
 **Basics**
 - Clone the repository
